@@ -8,33 +8,27 @@
 		{
 			"path": "pages/todo/index",
 			"style": {
-				"navigationBarTitleText": "待办"
+				"navigationStyle": "custom"
 			}
 		},
 		{
-            "path" : "pages/todo/content",
-            "style": {
-            	"navigationBarTitleText": "所有待办"
-            }
-        },
-		{
             "path" : "pages/doing/index",
             "style": {
-            	"navigationBarTitleText": "待办集"
+            	"navigationStyle": "custom"
             }
-        },
-		{
-		    "path" : "pages/calendar/index",
-		    "style": {
-		    	"navigationBarTitleText": "日历"
-		    }
-		},
-		{
-		    "path" : "pages/analysis/index",
-		    "style": {
-		    	"navigationBarTitleText": "统计"
-		    }
-		}
+        }
+		// {
+		//     "path" : "pages/calendar/index",
+		//     "style": {
+		//     	"navigationBarTitleText": "日历"
+		//     }
+		// },
+		// {
+		//     "path" : "pages/analysis/index",
+		//     "style": {
+		//     	"navigationBarTitleText": "统计"
+		//     }
+		// }
     ],
 	"tabBar": {
 		"color": "#000",
@@ -43,19 +37,11 @@
 		"list": [
 			{
 				"pagePath": "pages/todo/index",
-				"text": "待办"
+				"text": "待办事项"
 			},
 			{
 				"pagePath": "pages/doing/index",
-				"text": "待办集"
-			},
-			{
-				"pagePath": "pages/calendar/index",
-				"text": "日历"
-			},
-			{
-				"pagePath": "pages/analysis/index",
-				"text": "统计"
+				"text": "已完成"
 			}
 		]
 	}

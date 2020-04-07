@@ -10,7 +10,7 @@
     </view>
 </template>
 <script>
-import todoData from '../../../data/todaData';
+import todoData from '../../../data/todoData';
 export default {
     data () {
         return {

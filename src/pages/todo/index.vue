@@ -1,13 +1,24 @@
 <template>
     <view class="todo_wrapper">
+        <uni-nav-bar :shadow="false">
+            <view slot="default" class="nav__title">
+                <text>待办事项</text>
+            </view>
+            <view slot="right">
+                <uni-icons type="plusempty"
+                    color="#ccc"
+                    size="28"
+                    @click="$refs.addDialog.open()">
+                </uni-icons>
+            </view>
+        </uni-nav-bar>
         <uni-swipe-action class="todo__list" 
             v-for="(item, index) in todoDataList"
             :key="index">
             <uni-swipe-action-item :options="options"
                 @click="handleTodoList($event, index)"
                 :autoClose="true">
-                <view @tap="showContent(item)"
-                    class="todo__list-cell">
+                <view class="todo__list-cell">
                     <view class="todo__list__header">
                         <view class="todo__list-title">
                             {{ item.title }}
@@ -42,6 +53,47 @@
                 </view>
             </view>
         </uni-popup>
+
+        <!-- 待办事项输入框 -->
+        <uni-popup ref="addDialog"
+            :maskClick="false">
+            <view class="todo__list-delete-dialog__wrapper">
+                <view class="todo__list-delete-dialog__title">
+                    添加待办事项
+                </view>
+                <view class="todo__list-delete-dialog__body_input">
+                    <text class="input_text">内容：</text>
+                    <input type="text"
+                        :focus="true"
+                        class="input_area"
+                        v-model="todoDetail">
+                </view>
+                <view class="todo__list-delete-dialog__body_input">
+                    <text class="input_text">重要程度：</text>
+                    <radio-group class="radio_area" @change="radioChange">
+                        <label class="radio_area radio_label" v-for="(item, index) in importantLevel"
+                            :key="index">
+                            <view class="radio_single">
+                                <radio :value="item.value" :checked="item.default"></radio>
+                            </view>
+                            <view class="radio_text">
+                                {{ item.text }}
+                            </view>
+                        </label>
+                    </radio-group>
+                </view>
+                <view class="todo__list-delete-dialog__bottom">
+                    <text class="todo__list-delete-dialog__bottom-btn border-right"
+                        @tap="$refs.addDialog.close()">
+                        取消
+                    </text>
+                    <text class="todo__list-delete-dialog__bottom-btn save-opt"
+                        @tap="addTodoList">
+                        保存
+                    </text>
+                </view>
+            </view>
+        </uni-popup>
     </view>
 </template>
 
@@ -49,9 +101,10 @@
 const operation = {
     'FINISHED': '标记为完成',
     'DELETE': '删除'
-}
-import todoData from '../../../data/todaData';
-import {uniSwipeAction, uniSwipeActionItem, uniPopup} from '@dcloudio/uni-ui';
+};
+import todoData from '../../../data/todoData';
+import doingData from '../../../data/doingData';
+import {uniSwipeAction, uniSwipeActionItem, uniPopup, uniNavBar, uniIcons} from '@dcloudio/uni-ui';
 export default {
     data () {
         return {
@@ -60,25 +113,44 @@ export default {
             options: [
                 {   
                     type: '',
-                    text: '标记为完成',
+                    text: operation.FINISHED,
                     style: {
                         backgroundColor: '#ccc'
                     }
                 },
                 {
-                    text: '删除',
+                    text: operation.DELETE,
                     style: {
                         backgroundColor: '#dd524d'
                     }
                 },
             ],
-            deleteObj: 0
+            deleteObj: 0,
+            todoDetail: '',
+            todoImportant: 'high',
+            importantLevel: [
+                {
+                    text: '高',
+                    value: 'high',
+                    default: true
+                },
+                {
+                    text: '中',
+                    value: 'middle'
+                },
+                {
+                    text: '低',
+                    value: 'low'
+                }
+            ]
         }
     },
     components: {
         uniSwipeAction,
         uniSwipeActionItem,
-        uniPopup
+        uniPopup,
+        uniNavBar,
+        uniIcons
     },
     computed: {
         showImportant (important) {
@@ -97,17 +169,33 @@ export default {
                 this.$refs.deleteDialog.open();
                 this.deleteObj = index;
             } else {
-                
+                this.markFinished(this.todoDataList[index]);
+                this.todoDataList.splice(index, 1);
             }
         },
         deleteToDoList () {
             this.todoDataList.splice(this.deleteObj, 1);
             this.$refs.deleteDialog.close();
         },
-        showContent (item) {
-            uni.navigateTo({
-                url: `./content?id=${item.id}`
-            });
+        markFinished (item) {
+            doingData.push(item);
+        },
+        addTodoList () {
+            let newTodoData = {
+                'id': 'todo001',
+                'title': this.todoDetail,
+                'startTime': new Date().getTime(),
+                'important': this.todoImportant,
+                'type': '工作',
+                'state': '0'
+            };
+            todoData.push(newTodoData);
+            this.$refs.addDialog.close();
+            this.todoDetail = '';
+            this.todoImportant = '';
+        }, 
+        radioChange (e) {
+            this.todoImportant = e.detail.value;
         }
     }
 }
@@ -174,5 +262,54 @@ export default {
 }
 .warn-opt {
     color: #DE1B1B;
+}
+.save-opt {
+    color: #3366FF;
+}
+.nav__title {
+    flex-basis: 100%;
+    text-align: center;
+}
+.todo__list-delete-dialog__title {
+    font-family: PingFangSC-Medium;
+    font-size: 18px;
+    color: #14161A;
+    text-align: center;
+    line-height: 40rpx;
+    margin-top: 48rpx;
+}
+.todo__list-delete-dialog__body_input {
+    display: flex;
+    padding: 0 40rpx;
+    margin: 40rpx 0;
+    flex-direction: row;
+}
+.input_text {
+    font-size: 25rpx;
+    flex-basis: 150rpx;
+}
+.input_area {
+    border-bottom: 1rpx solid #ccc;
+    flex: 1;
+}
+.radio_area {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    bottom: 4rpx;
+}
+.radio_label {
+    padding-left: 20rpx;
+    font-size: 25rpx;
+}
+.radio_single {
+    transform: scale(0.8);
+}
+.radio_text {
+    position: relative;
+    top: 4rpx;
+}
+.uni-navbar__content_view {
+    justify-content: center;
 }
 </style>
